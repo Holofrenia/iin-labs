@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Criatura red 003 — escultura interactiva + doppler</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  html, body { margin: 0; height: 100%; background: #000000; }
+  three-d-stage:not(:defined) { visibility: hidden; }
+  three-d-stage { display: block; width: 100vw; height: 100vh; }
+  #hud {
+    position: fixed; left: 20px; bottom: 20px; z-index: 5;
+    display: flex; gap: 10px; align-items: center;
+  }
+  #hud button {
+    font: 500 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #8fd0f2; background: rgba(10,12,18,0.85);
+    border: 1px solid rgba(143,208,242,0.45); border-radius: 999px;
+    padding: 10px 18px; cursor: pointer; backdrop-filter: blur(6px);
+  }
+  #hud button:hover { border-color: rgba(143,208,242,0.9); }
+  #sound-toggle[data-on="true"] { color: #05070a; background: #8fd0f2; border-color: #8fd0f2; }
+  #lang { min-width: 74px; }
+  #title {
+    position: fixed; left: 26px; top: 22px; z-index: 5; margin: 0;
+    font: 700 22px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.16em; color: #8fd0f2;
+  }
+  #hud input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 108px; height: 22px; background: transparent; cursor: pointer;
+  }
+  #hud input[type="range"]::-webkit-slider-runnable-track {
+    height: 3px; background: rgba(143,208,242,0.65); border-radius: 2px;
+  }
+  #hud input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 12px; height: 12px; margin-top: -5px; border-radius: 50%;
+    background: #8fd0f2; border: none;
+  }  #hud input[type="range"]::-moz-range-track { height: 3px; background: rgba(143,208,242,0.65); }
+  #hud input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: none; border-radius: 50%; background: #8fd0f2; }
+  #hint {
+    position: fixed; left: 22px; bottom: 62px; z-index: 5;
+    font: 500 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: rgba(180,205,225,0.55); letter-spacing: 0.14em;
+    text-transform: uppercase; max-width: 26ch;
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" fill="#000"/>
+  <circle cx="120" cy="120" r="62" fill="none" stroke="#8fd0f2" stroke-width="3" opacity="0.8"/>
+  <circle cx="120" cy="120" r="40" fill="none" stroke="#9b6ef3" stroke-width="3" opacity="0.8"/>
+  <circle cx="120" cy="120" r="12" fill="#8fd0f2"/>
+  <text x="120" y="205" text-anchor="middle" font-family="monospace" font-size="26" fill="#9b6ef3">02</text>
+</svg>
+</template>
+<three-d-stage name="criatura-red-003" background="#000000"></three-d-stage>
+<h1 id="title">IIN-001</h1>
+<p id="hint">DRAG SPHERES TO SCULPT WITH SOUND</p>
+<div id="hud">
+  <button id="lang" type="button">EN / ES</button>
+  <button id="sound-toggle" data-on="true" type="button">SOUND ON</button>
+  <input id="volume" type="range" min="0" max="100" value="80" aria-label="volume">
+  <button id="reset" type="button">RESET</button>
+</div>
+<script>
+  (function () {
+    const STR = {
+      en: { hint: 'DRAG SPHERES TO SCULPT WITH SOUND', on: 'SOUND ON', off: 'SOUND OFF', reset: 'RESET' },
+      es: { hint: 'ARRASTRA ESFERAS PARA ESCULPIR CON SONIDO', on: 'SONIDO ON', off: 'SONIDO OFF', reset: 'REINICIAR' }
+    };
+    let lang = 'en';
+    const hint = document.getElementById('hint');
+    const snd = document.getElementById('sound-toggle');
+    const rst = document.getElementById('reset');
+    const paint = () => {
+      const s = STR[lang];
+      hint.textContent = s.hint;
+      snd.textContent = snd.getAttribute('data-on') === 'true' ? s.on : s.off;
+      rst.textContent = s.reset;
+      document.documentElement.lang = lang;
+    };
+    window.__scenePaint = paint;
+    window.__sceneStrings = () => STR[lang];
+    document.getElementById('lang').addEventListener('click', () => {
+      lang = lang === 'en' ? 'es' : 'en';
+      paint();
+    });
+    new MutationObserver(paint).observe(snd, { attributes: true, attributeFilter: ['data-on'] });
+    paint();
+  })();
+</script>
+<script src="three-d-stage.js"></script>
+<script type="module" src="criatura-red-003-model.js"></script>
+</body>
+</html>
