@@ -1,116 +1,393 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-<meta charset="utf-8">
-<title>Criatura red 003 — escultura interactiva + doppler</title>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
-    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
-    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
-    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
-  },
-  "integrity": {
-    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
-    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
-    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
-    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
-    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
-  }
-}
-</script>
-<style>
-  html, body { margin: 0; height: 100%; background: #000000; }
-  three-d-stage:not(:defined) { visibility: hidden; }
-  three-d-stage { display: block; width: 100vw; height: 100vh; }
-  #hud {
-    position: fixed; left: 20px; bottom: 20px; z-index: 5;
-    display: flex; gap: 10px; align-items: center;
-  }
-  #hud button {
-    font: 500 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: #8fd0f2; background: rgba(10,12,18,0.85);
-    border: 1px solid rgba(143,208,242,0.45); border-radius: 999px;
-    padding: 10px 18px; cursor: pointer; backdrop-filter: blur(6px);
-  }
-  #hud button:hover { border-color: rgba(143,208,242,0.9); }
-  #sound-toggle[data-on="true"] { color: #05070a; background: #8fd0f2; border-color: #8fd0f2; }
-  #lang { min-width: 74px; }
-  #title {
-    position: fixed; left: 26px; top: 22px; z-index: 5; margin: 0;
-    font: 700 22px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing: 0.16em; color: #8fd0f2;
-  }
-  #hud input[type="range"] {
-    -webkit-appearance: none; appearance: none;
-    width: 108px; height: 22px; background: transparent; cursor: pointer;
-  }
-  #hud input[type="range"]::-webkit-slider-runnable-track {
-    height: 3px; background: rgba(143,208,242,0.65); border-radius: 2px;
-  }
-  #hud input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none;
-    width: 12px; height: 12px; margin-top: -5px; border-radius: 50%;
-    background: #8fd0f2; border: none;
-  }  #hud input[type="range"]::-moz-range-track { height: 3px; background: rgba(143,208,242,0.65); }
-  #hud input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: none; border-radius: 50%; background: #8fd0f2; }
-  #hint {
-    position: fixed; left: 22px; bottom: 62px; z-index: 5;
-    font: 500 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
-    color: rgba(180,205,225,0.55); letter-spacing: 0.14em;
-    text-transform: uppercase; max-width: 26ch;
-  }
-</style>
+  <meta charset="utf-8">
+  <title>Criatura red 004 — escultura interactiva + doppler</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #faf9f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    #__bundler_loading { position: fixed; bottom: 20px; right: 20px; font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; color: #666; background: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 10000; }
+    #__bundler_thumbnail { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #faf9f5; z-index: 9999; }
+    #__bundler_thumbnail svg { width: 100%; height: 100%; object-fit: contain; }
+    #__bundler_placeholder { color: #999; font-size: 14px; }
+  </style>
+  <noscript>
+    <style>#__bundler_loading { display: none; }</style>
+    <div style="position:fixed;bottom:12px;left:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#999;background:rgba(255,255,255,0.9);padding:6px 12px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:10000;">
+      This page requires JavaScript to display.
+    </div>
+  </noscript>
 </head>
 <body>
-<template id="__bundler_thumbnail">
+  <div id="__bundler_thumbnail">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-  <rect width="240" height="240" fill="#000"/>
-  <circle cx="120" cy="120" r="62" fill="none" stroke="#8fd0f2" stroke-width="3" opacity="0.8"/>
-  <circle cx="120" cy="120" r="40" fill="none" stroke="#9b6ef3" stroke-width="3" opacity="0.8"/>
-  <circle cx="120" cy="120" r="12" fill="#8fd0f2"/>
+  <rect width="240" height="240" fill="#000"></rect>
+  <circle cx="120" cy="120" r="62" fill="none" stroke="#8fd0f2" stroke-width="3" opacity="0.8"></circle>
+  <circle cx="120" cy="120" r="40" fill="none" stroke="#9b6ef3" stroke-width="3" opacity="0.8"></circle>
+  <circle cx="120" cy="120" r="12" fill="#8fd0f2"></circle>
   <text x="120" y="205" text-anchor="middle" font-family="monospace" font-size="26" fill="#9b6ef3">02</text>
 </svg>
-</template>
-<three-d-stage name="criatura-red-003" background="#000000"></three-d-stage>
-<h1 id="title">IIN-001</h1>
-<p id="hint">DRAG SPHERES TO SCULPT WITH SOUND</p>
-<div id="hud">
-  <button id="lang" type="button">EN / ES</button>
-  <button id="sound-toggle" data-on="true" type="button">SOUND ON</button>
-  <input id="volume" type="range" min="0" max="100" value="80" aria-label="volume">
-  <button id="reset" type="button">RESET</button>
 </div>
-<script>
-  (function () {
-    const STR = {
-      en: { hint: 'DRAG SPHERES TO SCULPT WITH SOUND', on: 'SOUND ON', off: 'SOUND OFF', reset: 'RESET' },
-      es: { hint: 'ARRASTRA ESFERAS PARA ESCULPIR CON SONIDO', on: 'SONIDO ON', off: 'SONIDO OFF', reset: 'REINICIAR' }
-    };
-    let lang = 'en';
-    const hint = document.getElementById('hint');
-    const snd = document.getElementById('sound-toggle');
-    const rst = document.getElementById('reset');
-    const paint = () => {
-      const s = STR[lang];
-      hint.textContent = s.hint;
-      snd.textContent = snd.getAttribute('data-on') === 'true' ? s.on : s.off;
-      rst.textContent = s.reset;
-      document.documentElement.lang = lang;
-    };
-    window.__scenePaint = paint;
-    window.__sceneStrings = () => STR[lang];
-    document.getElementById('lang').addEventListener('click', () => {
-      lang = lang === 'en' ? 'es' : 'en';
-      paint();
+  <div id="__bundler_loading">Unpacking...</div>
+
+  <script>
+    
+document.addEventListener('DOMContentLoaded', async function() {
+  const loading = document.getElementById('__bundler_loading');
+  function setStatus(msg) { if (loading) loading.textContent = msg; }
+
+  const FONT_MIME = /^(font[/]|application[/](x-)?font-|application[/]vnd\.ms-fontobject)/i;
+  const MIME_TOKEN = /^[\w.+-]+[/][\w.+-]+$/;
+  function toBase64(bytes) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    }
+    return btoa(bin);
+  }
+
+  // Error sink persists across replaceWith since it's on window, not the DOM.
+  window.addEventListener('error', function(e) {
+    // Failed resource loads (CSP-blocked links, scripts, images) fire plain
+    // events at the element — warn only; real JS errors carry message/error.
+    if (!e.message && !e.error && e.target && e.target !== window) {
+      console.warn('[bundle] resource failed to load:',
+        e.target.tagName, String(e.target.src || e.target.href || ''));
+      return;
+    }
+    var p = document.body || document.documentElement;
+    var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
+    d.id = '__bundler_err';
+    d.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;font:12px/1.4 ui-monospace,monospace;background:#2a1215;color:#ff8a80;padding:10px 14px;border-radius:8px;border:1px solid #5c2b2e;z-index:99999;white-space:pre-wrap;max-height:40vh;overflow:auto';
+    d.textContent = (d.textContent ? d.textContent + String.fromCharCode(10) : '') +
+      '[bundle] ' + (e.message || e.type) +
+      (e.filename ? ' (' + e.filename.slice(0, 60) + ':' + e.lineno + ')' : '');
+  }, true);
+
+  try {
+    const manifestEl = document.querySelector('script[type="__bundler/manifest"]');
+    const templateEl = document.querySelector('script[type="__bundler/template"]');
+    if (!manifestEl || !templateEl) {
+      setStatus('Error: missing bundle data');
+      console.error('[bundler] Missing script tags — manifestEl:', !!manifestEl, 'templateEl:', !!templateEl);
+      return;
+    }
+
+    const manifest = JSON.parse(manifestEl.textContent);
+    let template = JSON.parse(templateEl.textContent);
+
+    // Nested page bundles (iframe targets). Each ships ONCE, in the ROOT
+    // document's manifest; frame srcs carry an about:blank#<uuid> marker
+    // instead of a substitutable uuid. Every document mints the blobs for
+    // its OWN frames — from local text at the root, or text obtained from
+    // its DIRECT parent over the relay protocol below — so each frame
+    // navigation stays same-origin with its initiator and a deduped page
+    // loads at any depth on any host, including a file:// download's
+    // opaque origins (where a blob minted by one document cannot be
+    // navigated to by another).
+    const pageOrderEl = document.querySelector('script[type="__bundler/page_order"]');
+    const pageOrder = pageOrderEl ? JSON.parse(pageOrderEl.textContent) : [];
+    const pageSet = new Set(pageOrder);
+    const pageTexts = {};
+
+    // ── Nested-page text protocol (parent-chain relay) ──
+    // Page bundles ship once, in the ROOT document's manifest. Every
+    // document mints the blobs for its OWN frames, obtaining page text
+    // through a strict parent-chain relay: a document only ever SENDS to
+    // its direct parent (which, for every document the publisher's own
+    // runtime minted, is another publisher document) and only ACCEPTS
+    // text from that direct parent; requests from below are honored only
+    // for the document's own child frames, and the ROOT never sends
+    // upward at all. That last rule is load-bearing: the artifact host's
+    // frame-ancestors allows claude.ai (and friends) to frame an
+    // artifact, so window.top can be a FOREIGN document — a top-addressed
+    // protocol would hand page uuids to that ancestor and accept forged
+    // "page text" from it, minting attacker HTML as an artifact-origin
+    // blob document. The chain never touches the ancestor: requests stop
+    // at the root, replies are origin-addressed per hop (never '*' when
+    // an origin exists), and both directions are origin-gated (on https
+    // a foreign sender's origin can never equal this document's; in
+    // opaque contexts — file:// — everything serializes as 'null', where
+    // an embedded EXTERNAL frame still fails the gate by carrying its
+    // own real origin, and a sandboxed child of such a frame is excluded
+    // by the own-child-frames check plus uuid unguessability). Shape is
+    // deny-by-default: one request form, one reply form, no error
+    // replies.
+    // window.origin is the SERIALIZED SECURITY origin ('null' in opaque
+    // contexts such as a sandboxed preview iframe) — location.origin is
+    // computed from the URL and stays 'https://…' even when the document
+    // is sandboxed, which would misgate every opaque chain.
+    const OWN_TARGET = /^https?:[/][/]/.test(window.origin || '')
+      ? window.origin
+      : '*';
+    function trustedOrigin(e) {
+      if (e.origin === window.origin) return true; // https chains; opaque==opaque
+      // file:// trees: Chrome serializes the file document's origin as
+      // 'file://' while the blob: documents it mints serialize as 'null',
+      // so the two legitimate shapes can never string-match — accept the
+      // pair in both directions. https origins never serialize as either,
+      // and sender identity (own child frame / direct parent) is checked
+      // separately.
+      return (
+        (e.origin === 'null' &&
+          (window.origin === 'file://' ||
+            window.location.protocol === 'file:')) ||
+        (/^file:/.test(e.origin) && window.origin === 'null')
+      );
+    }
+    // Non-empty only in the root document (nested bundles ship an empty
+    // island), so it doubles as the root marker: the root answers from
+    // local text and treats a miss as authoritative — never relaying to
+    // its (possibly foreign) parent.
+    const isPageRoot = pageOrder.length > 0;
+    const blobUrls = {};
+    const resourceBlobs = {};
+    const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    const pendingFrames = {}; // uuid -> [{el, frag}] awaiting text for own frames
+    const pendingRelays = {}; // uuid -> [childWindow] awaiting text to pass down
+    function mountPage(el, frag, text) {
+      const pageBlob = new Blob([text], { type: 'text/html' });
+      const u = URL.createObjectURL(pageBlob);
+      resourceBlobs[u] = pageBlob;
+      el.src = u + frag;
+    }
+    function deliverPage(uuid, text) {
+      const frames = pendingFrames[uuid];
+      delete pendingFrames[uuid];
+      if (frames) for (const f of frames) mountPage(f.el, f.frag, text);
+      const relays = pendingRelays[uuid];
+      delete pendingRelays[uuid];
+      if (relays) {
+        for (const cw of relays) {
+          try { cw.postMessage({ __bundler_page: uuid, __bundler_text: text }, OWN_TARGET); } catch (err) { /* gone */ }
+        }
+      }
+    }
+    function ownFrameWindows() {
+      const out = [];
+      for (const f of Array.from(document.querySelectorAll('iframe'))) {
+        try { if (f.contentWindow) out.push(f.contentWindow); } catch (err) { /* detached */ }
+      }
+      return out;
+    }
+    window.addEventListener('message', function (e) {
+      const d = e.data;
+      if (!d || typeof d !== 'object' || !e.source) return;
+      // Origin gate first; the structural checks below (own-child-frames
+      // for requests, direct-parent + solicited-uuid for replies, the
+      // root's never-relay rule) are what hold in fully opaque chains
+      // where origin strings can't discriminate — a sandboxed root's
+      // FOREIGN wrapper still fails all three even though both serialize
+      // as real-vs-'null' rather than matching.
+      if (!trustedOrigin(e)) return;
+      if (typeof d.__bundler_need === 'string' && UUID_SHAPE.test(d.__bundler_need)) {
+        // Requests are honored only for this document's own child frames.
+        if (ownFrameWindows().indexOf(e.source) < 0) return;
+        const uuid = d.__bundler_need;
+        const text = pageTexts[uuid];
+        if (typeof text === 'string') {
+          try { e.source.postMessage({ __bundler_page: uuid, __bundler_text: text }, OWN_TARGET); } catch (err) { /* gone */ }
+          return;
+        }
+        if (isPageRoot || window.parent === window) return; // authoritative miss
+        const waiting = pendingRelays[uuid];
+        if (waiting) {
+          if (waiting.indexOf(e.source) < 0) waiting.push(e.source);
+          return;
+        }
+        // Never-answered uuids would otherwise accumulate forever under a
+        // request spray; past the cap (far above any real page count) new
+        // relays are dropped rather than remembered.
+        if (Object.keys(pendingRelays).length >= 128) return;
+        pendingRelays[uuid] = [e.source];
+        window.parent.postMessage({ __bundler_need: uuid }, OWN_TARGET);
+      } else if (
+        typeof d.__bundler_page === 'string' &&
+        UUID_SHAPE.test(d.__bundler_page) &&
+        typeof d.__bundler_text === 'string'
+      ) {
+        // The shape test is load-bearing beyond tidiness: the solicited
+        // check below uses the in operator, which matches prototype keys
+        // ('__proto__', 'constructor') — an unshaped key would reach
+        // deliverPage and throw, painting the error banner.
+        // Text is accepted only from the direct parent — the document
+        // that minted this one.
+        if (e.source !== window.parent || window.parent === window) return;
+        if (!(d.__bundler_page in pendingFrames) && !(d.__bundler_page in pendingRelays)) return;
+        deliverPage(d.__bundler_page, d.__bundler_text);
+      }
     });
-    new MutationObserver(paint).observe(snd, { attributes: true, attributeFilter: ['data-on'] });
-    paint();
-  })();
-</script>
-<script src="three-d-stage.js"></script>
-<script type="module" src="criatura-red-003-model.js"></script>
+
+    const uuids = Object.keys(manifest);
+    setStatus('Unpacking ' + uuids.length + ' assets...');
+
+    await Promise.all(uuids.map(async (uuid) => {
+      const entry = manifest[uuid];
+      try {
+        const binaryStr = atob(entry.data);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+        let finalBytes = bytes;
+        if (entry.compressed) {
+          if (typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('gzip');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+            writer.write(bytes);
+            writer.close();
+            const chunks = [];
+            let totalLen = 0;
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              totalLen += value.length;
+            }
+            finalBytes = new Uint8Array(totalLen);
+            let offset = 0;
+            for (const chunk of chunks) { finalBytes.set(chunk, offset); offset += chunk.length; }
+          } else {
+            console.warn('DecompressionStream not available, asset ' + uuid + ' may not render');
+          }
+        }
+
+        if (pageSet.has(uuid)) {
+          pageTexts[uuid] = new TextDecoder().decode(finalBytes);
+          return;
+        }
+        if (FONT_MIME.test(entry.mime) && MIME_TOKEN.test(entry.mime)) {
+          // Strict artifact hosts allow font-src data: but not blob:.
+          blobUrls[uuid] = 'data:' + entry.mime + ';base64,' +
+            (entry.compressed ? toBase64(finalBytes) : entry.data);
+        } else {
+          const blob = new Blob([finalBytes], { type: entry.mime });
+          blobUrls[uuid] = URL.createObjectURL(blob);
+          resourceBlobs[blobUrls[uuid]] = blob;
+        }
+      } catch (err) {
+        console.error('Failed to decode asset ' + uuid + ':', err);
+        const blob = new Blob([], { type: entry.mime });
+        blobUrls[uuid] = URL.createObjectURL(blob);
+        resourceBlobs[blobUrls[uuid]] = blob;
+      }
+    }));
+
+    const extResEl = document.querySelector('script[type="__bundler/ext_resources"]');
+    const extResources = extResEl ? JSON.parse(extResEl.textContent) : [];
+    const resourceMap = {};
+    for (const entry of extResources) {
+      if (blobUrls[entry.uuid]) resourceMap[entry.id] = blobUrls[entry.uuid];
+    }
+
+    // Artifact-host CSP (connect-src 'self') refuses fetch() of blob: URLs —
+    // consumers read these Blobs directly. Survives the swap like the error sink.
+    window.__resourceBlobs = resourceBlobs;
+
+    setStatus('Rendering...');
+    // Page uuids have no blob here — they ride inside about:blank#<uuid>
+    // frame markers the pass below resolves after the swap.
+    for (const uuid of uuids) {
+      if (pageSet.has(uuid)) continue;
+      template = template.split(uuid).join(blobUrls[uuid]);
+    }
+
+    // Strip integrity + crossorigin — blob URLs from a file:// document inherit
+    // a null origin, so crossorigin forces a CORS fetch that SRI then rejects.
+    // The manifest bytes are ours; SRI protects against CDN compromise, not this.
+    template = template.replace(/\s+integrity="[^"]*"/gi, '').replace(/\s+crossorigin="[^"]*"/gi, '');
+
+    const resourceScript = '<script>window.__resources = ' +
+      JSON.stringify(resourceMap).replace(/<\//g, '<\\/') +
+      ';</' + 'script>';
+    // Inject after <head> so the DOCTYPE stays first; prepending the script
+    // would push the parser into quirks mode. DOMParser always emits a <head>
+    // (synthesizing one if the source HTML omitted it) but may carry
+    // attributes through, so match the full opening tag. slice() rather than
+    // replace() keeps us clear of $-pattern substitution in resourceScript.
+    const headOpen = template.match(/<head[^>]*>/i);
+    if (headOpen) {
+      const i = headOpen.index + headOpen[0].length;
+      template = template.slice(0, i) + resourceScript + template.slice(i);
+    }
+
+    // Parse the template and swap the root element. Scripts inserted via
+    // DOMParser/replaceWith are inert per spec — re-create each with
+    // createElement so they execute, awaiting onload for src scripts to
+    // preserve ordering (React before ReactDOM before Babel before text/babel).
+    const doc = new DOMParser().parseFromString(template, 'text/html');
+    document.documentElement.replaceWith(doc.documentElement);
+
+    // Resolve page-frame markers: mint this document's own blob for each
+    // framed page — from local text when this is the root, otherwise by
+    // asking the direct parent over the relay protocol above. An
+    // unanswered request leaves the frame on about:blank, the same
+    // degraded state as a refused embed.
+    {
+      const MARKER = /^about:blank#([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(#.*)?$/;
+      const needed = [];
+      for (const el of Array.from(document.querySelectorAll('iframe'))) {
+        const m = MARKER.exec(el.getAttribute('src') || '');
+        if (!m) continue;
+        const text = pageTexts[m[1]];
+        if (typeof text === 'string') {
+          mountPage(el, m[2] || '', text);
+        } else if (window.parent !== window && !isPageRoot) {
+          const had = pendingFrames[m[1]];
+          (pendingFrames[m[1]] = had || []).push({ el: el, frag: m[2] || '' });
+          if (!had) needed.push(m[1]);
+        }
+      }
+      for (const uuid of needed) {
+        window.parent.postMessage({ __bundler_need: uuid }, OWN_TARGET);
+      }
+    }
+
+    const dead = Array.from(document.scripts);
+    for (const old of dead) {
+      const s = document.createElement('script');
+      for (const a of old.attributes) s.setAttribute(a.name, a.value);
+      s.textContent = old.textContent;
+      // text/babel scripts with a src: read and inline. transformScriptTags
+      // does XHR against the src, but blob:null/ from a file:// origin is
+      // silently dropped. Inlining makes it a plain inline babel script,
+      // which transformScriptTags handles unconditionally.
+      if ((s.type === 'text/babel' || s.type === 'text/jsx') && s.src) {
+        const pre = resourceBlobs[s.src.split('#')[0]];
+        s.textContent = pre ? await pre.text() : await (await fetch(s.src)).text();
+        s.removeAttribute('src');
+      }
+      const p = s.src ? new Promise(function(r) { s.onload = s.onerror = r; }) : null;
+      old.replaceWith(s);
+      if (p) await p;
+    }
+    // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
+    // which fired before we swapped the document. Trigger manually if present.
+    if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
+      window.Babel.transformScriptTags();
+    }
+  } catch (err) {
+    setStatus('Error unpacking: ' + err.message);
+    console.error('Bundle unpack error:', err);
+  }
+});
+
+  </script>
+
+  <script type="__bundler/manifest">
+{"0a2d5937-1835-40d1-b3f7-d1537830715f":{"mime":"text/javascript","compressed":true,"data":"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"},"7919a389-5752-4a26-a697-7f2414254723":{"mime":"application/javascript","compressed":true,"data":"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"}}
+  </script>
+
+  <script type="__bundler/ext_resources">
+[]
+  </script>
+
+  <script type="__bundler/page_order">
+[]
+  </script>
+
+  <script type="__bundler/template">
+"<!DOCTYPE html>\n<html lang=\"es\"><head>\n<meta charset=\"utf-8\">\n<title>Criatura red 004 — escultura interactiva + doppler<\u002Ftitle>\n<script type=\"importmap\">\n{\n  \"imports\": {\n    \"three\": \"https://unpkg.com/three@0.184.0/build/three.module.js\",\n    \"three/addons/controls/OrbitControls.js\": \"https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js\",\n    \"three/addons/exporters/OBJExporter.js\": \"https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js\",\n    \"three/addons/exporters/GLTFExporter.js\": \"https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js\"\n  },\n  \"integrity\": {\n    \"https://unpkg.com/three@0.184.0/build/three.module.js\": \"sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J\",\n    \"https://unpkg.com/three@0.184.0/build/three.core.js\": \"sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT\",\n    \"https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js\": \"sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9\",\n    \"https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js\": \"sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3\",\n    \"https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js\": \"sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ\"\n  }\n}\n<\u002Fscript>\n<style>\n  html, body { margin: 0; height: 100%; background: #000000; }\n  three-d-stage:not(:defined) { visibility: hidden; }\n  three-d-stage { display: block; width: 100vw; height: 100vh; }\n  #hud {\n    position: fixed; left: 20px; bottom: 20px; z-index: 5;\n    display: flex; gap: 10px; align-items: center;\n  }\n  #hud button {\n    font: 500 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;\n    letter-spacing: 0.08em; text-transform: uppercase;\n    color: #8fd0f2; background: rgba(10,12,18,0.85);\n    border: 1px solid rgba(143,208,242,0.45); border-radius: 999px;\n    padding: 10px 18px; cursor: pointer; backdrop-filter: blur(6px);\n  }\n  #hud button:hover { border-color: rgba(143,208,242,0.9); }\n  #sound-toggle[data-on=\"true\"] { color: #05070a; background: #8fd0f2; border-color: #8fd0f2; }\n  #lang { min-width: 74px; }\n  #title {\n    position: fixed; left: 26px; top: 22px; z-index: 5; margin: 0;\n    font: 700 22px/1 ui-monospace, SFMono-Regular, Menlo, monospace;\n    letter-spacing: 0.16em; color: #8fd0f2;\n  }\n  #hud input[type=\"range\"] {\n    -webkit-appearance: none; appearance: none;\n    width: 108px; height: 22px; background: transparent; cursor: pointer;\n  }\n  #hud input[type=\"range\"]::-webkit-slider-runnable-track {\n    height: 3px; background: rgba(143,208,242,0.65); border-radius: 2px;\n  }\n  #hud input[type=\"range\"]::-webkit-slider-thumb {\n    -webkit-appearance: none; appearance: none;\n    width: 12px; height: 12px; margin-top: -5px; border-radius: 50%;\n    background: #8fd0f2; border: none;\n  }  #hud input[type=\"range\"]::-moz-range-track { height: 3px; background: rgba(143,208,242,0.65); }\n  #hud input[type=\"range\"]::-moz-range-thumb { width: 12px; height: 12px; border: none; border-radius: 50%; background: #8fd0f2; }\n  #hint {\n    position: fixed; left: 22px; bottom: 62px; z-index: 5;\n    font: 500 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;\n    color: rgba(180,205,225,0.55); letter-spacing: 0.14em;\n    text-transform: uppercase; max-width: 26ch;\n  }\n<\u002Fstyle>\n<\u002Fhead>\n<body>\n\n<three-d-stage name=\"criatura-red-004\" background=\"#000000\"><\u002Fthree-d-stage>\n<h1 id=\"title\">IIN-001<\u002Fh1>\n<p id=\"hint\">DRAG SPHERES TO SCULPT WITH SOUND<\u002Fp>\n<div id=\"hud\">\n  <button id=\"lang\" type=\"button\">EN / ES<\u002Fbutton>\n  <button id=\"sound-toggle\" data-on=\"true\" type=\"button\">SOUND ON<\u002Fbutton>\n  <input id=\"volume\" type=\"range\" min=\"0\" max=\"100\" value=\"80\" aria-label=\"volume\">\n  <button id=\"reset\" type=\"button\">RESET<\u002Fbutton>\n<\u002Fdiv>\n<script>\n  (function () {\n    const STR = {\n      en: { hint: 'DRAG SPHERES TO SCULPT WITH SOUND', on: 'SOUND ON', off: 'SOUND OFF', reset: 'RESET' },\n      es: { hint: 'ARRASTRA ESFERAS PARA ESCULPIR CON SONIDO', on: 'SONIDO ON', off: 'SONIDO OFF', reset: 'REINICIAR' }\n    };\n    let lang = 'en';\n    const hint = document.getElementById('hint');\n    const snd = document.getElementById('sound-toggle');\n    const rst = document.getElementById('reset');\n    const paint = () => {\n      const s = STR[lang];\n      hint.textContent = s.hint;\n      snd.textContent = snd.getAttribute('data-on') === 'true' ? s.on : s.off;\n      rst.textContent = s.reset;\n      document.documentElement.lang = lang;\n    };\n    window.__scenePaint = paint;\n    window.__sceneStrings = () => STR[lang];\n    document.getElementById('lang').addEventListener('click', () => {\n      lang = lang === 'en' ? 'es' : 'en';\n      paint();\n    });\n    new MutationObserver(paint).observe(snd, { attributes: true, attributeFilter: ['data-on'] });\n    paint();\n  })();\n<\u002Fscript>\n<script src=\"0a2d5937-1835-40d1-b3f7-d1537830715f\"><\u002Fscript>\n<script type=\"module\" src=\"7919a389-5752-4a26-a697-7f2414254723\"><\u002Fscript>\n\n\n<\u002Fbody><\u002Fhtml>"
+  </script>
 </body>
 </html>
